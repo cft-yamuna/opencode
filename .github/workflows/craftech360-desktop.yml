@@ -20,15 +20,17 @@ jobs:
 
   mac:
     needs: release
-    runs-on: macos-15
+    runs-on: ${{ matrix.host }}
     strategy:
       fail-fast: false
       matrix:
         include:
           - target: darwin-arm64
+            host: macos-26
             cli: darwin-arm64
             arch: arm64
           - target: darwin-x64
+            host: macos-26-intel
             cli: darwin-x64-baseline
             arch: x64
     env:
