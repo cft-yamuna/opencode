@@ -4,6 +4,7 @@
 import {
   AppBaseProviders,
   AppInterface,
+  Craftech360Gate,
   currentRoute,
   PlatformProvider,
   preloadRoute,
@@ -116,6 +117,7 @@ export function DesktopApp(props: { api: ElectronAPI; version: string }) {
         <Show when={selectInterfaceMounted(startup.state())}>
           <AppInterface servers={servers()} router={router}>
             <DesktopStartupReady dispatch={startup.dispatch} />
+            <Craftech360Gate />
             <DesktopFirstLaunchOnboarding
               api={props.api}
               initialUrl={initialUrl}

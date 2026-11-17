@@ -5,6 +5,7 @@ import { ChatGPTPlugin } from "./provider/chatgpt.js"
 import { ClaudeAgentPlugin } from "./provider/claude-agent/index.js"
 import { CloudflareAIGatewayPlugin } from "./provider/cloudflare-ai-gateway.js"
 import { CloudflareWorkersAIPlugin } from "./provider/cloudflare-workers-ai.js"
+import { Craftech360Plugin } from "./provider/craftech360.js"
 import { DatabricksPlugin } from "./provider/databricks.js"
 import { DigitalOceanPlugin } from "./provider/digitalocean.js"
 import { GithubCopilotPlugin } from "./provider/github-copilot.js"
@@ -35,6 +36,7 @@ export const ProviderPlugins: PluginInternal.InternalPlugin[] = [
   AzurePlugin,
   CerebrasPlugin,
   ChatGPTPlugin,
+  Craftech360Plugin,
   CloudflareAIGatewayPlugin,
   CloudflareWorkersAIPlugin,
   DatabricksPlugin,

@@ -183,6 +183,9 @@ export const dict = {
   "dialog.provider.accounts.options": "{{account}} options",
   "provider.connect.copyFailed": "Couldn't copy to the clipboard",
   "provider.connect.title": "Connect {{provider}}",
+  "craftech360.signIn.title": "Sign in to Craftech360 AI",
+  "craftech360.signIn.description": "Use your craftech360.com Google account to connect OpenCode.",
+  "craftech360.signIn.button": "Sign in with Google",
 
   "provider.connect.breadcrumb.root": "Connect",
   "provider.connect.breadcrumb.label": "Connect steps",

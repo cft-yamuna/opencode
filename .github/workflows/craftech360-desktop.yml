@@ -1,0 +1,66 @@
+name: Craftech360 desktop
+
+on:
+  push:
+    branches: [craftech360-desktop]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view craftech360-v1 --repo "$GITHUB_REPOSITORY" ||
+            gh release create craftech360-v1 --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Craftech360 AI desktop v1" --notes "OpenCode desktop with Craftech360 AI Google sign-in. Mac builds are unsigned."
+
+  mac:
+    needs: release
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: darwin-arm64
+            cli: darwin-arm64
+            arch: arm64
+          - target: darwin-x64
+            cli: darwin-x64-baseline
+            arch: x64
+    env:
+      OPENCODE_CHANNEL: dev
+      OPENCODE_CRAFTECH360_BUILD: "1"
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-bun
+        with:
+          install-flags: --os=darwin --cpu=*
+      - name: Build CLI
+        working-directory: packages/cli
+        env:
+          OPENCODE_TARGET: ${{ matrix.cli }}
+        run: bun run build --skip-install --skip-web-ui
+      - name: Build desktop
+        working-directory: packages/desktop
+        env:
+          OPENCODE_TARGET: ${{ matrix.target }}
+        run: bun run build
+      - name: Package Mac app
+        working-directory: packages/desktop
+        env:
+          OPENCODE_TARGET: ${{ matrix.target }}
+        run: bun run pack
+      - name: Zip Mac app
+        run: |
+          mkdir -p "$RUNNER_TEMP/craftech360-app"
+          tar -xf "dist/desktop/opencode-desktop-mac-${{ matrix.arch }}.app.tar" -C "$RUNNER_TEMP/craftech360-app"
+          ditto -c -k --sequesterRsrc --keepParent "$RUNNER_TEMP/craftech360-app"/*.app "opencode-craftech360-mac-${{ matrix.arch }}.zip"
+      - name: Upload release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload craftech360-v1 "opencode-craftech360-mac-${{ matrix.arch }}.zip" --repo "$GITHUB_REPOSITORY" --clobber

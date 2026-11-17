@@ -45,6 +45,7 @@ export default defineConfig(({ command }) => {
       define: {
         // Local renderer/server mode still uses the dev application identity and updater policy.
         "import.meta.env.OPENCODE_CHANNEL": JSON.stringify(channel === "local" ? "dev" : channel),
+        "process.env.OPENCODE_CRAFTECH360_BUILD": JSON.stringify(process.env.OPENCODE_CRAFTECH360_BUILD === "1"),
       },
       build: {
         minify: command === "build",

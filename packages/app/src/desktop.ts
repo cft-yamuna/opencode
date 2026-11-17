@@ -21,3 +21,5 @@ export { createNamespaceStorage, type NamespaceStorage } from "./runtime/persist
 export { flushPersisted } from "./runtime/persistence/persist"
 
 export { usePluginServers } from "./runtime/plugin/servers"
+
+export { Craftech360Gate } from "./providers/connect/craftech360-gate"
