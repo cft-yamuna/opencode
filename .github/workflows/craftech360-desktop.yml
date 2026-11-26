@@ -57,10 +57,16 @@ jobs:
         env:
           OPENCODE_TARGET: ${{ matrix.target }}
         run: bun run pack
-      - name: Zip Mac app
+      # Without a Developer ID, sign ad-hoc so the bundle has a valid seal. Unsigned bundles with renamed
+      # Electron helpers fail validation on Apple Silicon, which macOS reports as "damaged".
+      - name: Ad-hoc sign Mac app
         run: |
           mkdir -p "$RUNNER_TEMP/craftech360-app"
           tar -xf "dist/desktop/opencode-desktop-mac-${{ matrix.arch }}.app.tar" -C "$RUNNER_TEMP/craftech360-app"
+          codesign --force --deep --sign - "$RUNNER_TEMP/craftech360-app"/*.app
+          codesign --verify --deep --strict --verbose=2 "$RUNNER_TEMP/craftech360-app"/*.app
+      - name: Zip Mac app
+        run: |
           ditto -c -k --sequesterRsrc --keepParent "$RUNNER_TEMP/craftech360-app"/*.app "opencode-craftech360-mac-${{ matrix.arch }}.zip"
       - name: Upload release asset
         env:
