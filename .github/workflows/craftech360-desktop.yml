@@ -68,7 +68,34 @@ jobs:
       - name: Zip Mac app
         run: |
           ditto -c -k --sequesterRsrc --keepParent "$RUNNER_TEMP/craftech360-app"/*.app "opencode-craftech360-mac-${{ matrix.arch }}.zip"
-      - name: Upload release asset
+      # Without notarization macOS blocks the first launch, so the disk image guides users to "Open Anyway"
+      # with a shortcut that opens System Settings > Privacy & Security.
+      - name: Build Mac disk image
+        run: |
+          app=$(ls -d "$RUNNER_TEMP/craftech360-app"/*.app)
+          name=$(basename "$app" .app)
+          staging=$(mktemp -d)
+          ditto "$app" "$staging/$name.app"
+          ln -s /Applications "$staging/Applications"
+          cat > "$staging/Allow $name.webloc" <<'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict><key>URL</key><string>x-apple.systempreferences:com.apple.preference.security?General</string></dict></plist>
+          EOF
+          cat > "$staging/How to install.txt" <<EOF
+          How to install $name
+
+          1. Drag "$name" onto the Applications folder.
+          2. Open "$name" from Applications. macOS will say it cannot verify the app. Click "Done".
+          3. Double-click "Allow $name" in this window. Privacy & Security opens.
+          4. Scroll down, click "Open Anyway" next to "$name", and confirm with your password.
+
+          You only need to do this once.
+          EOF
+          hdiutil create -volname "$name" -srcfolder "$staging" -fs HFS+ -format UDZO -ov "opencode-craftech360-mac-${{ matrix.arch }}.dmg"
+      - name: Upload release assets
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload craftech360-v1 "opencode-craftech360-mac-${{ matrix.arch }}.zip" --repo "$GITHUB_REPOSITORY" --clobber
+        run: |
+          gh release upload craftech360-v1 "opencode-craftech360-mac-${{ matrix.arch }}.zip" "opencode-craftech360-mac-${{ matrix.arch }}.dmg" \
+            --repo "$GITHUB_REPOSITORY" --clobber
